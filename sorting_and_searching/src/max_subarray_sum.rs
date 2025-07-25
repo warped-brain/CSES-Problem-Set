@@ -91,36 +91,18 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
 
 
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let  (n, m) = read_int_pair(reader);
+    let n = read_int(reader);
     let mut arr = read_int_list(reader);
-    // arr.sort();
-    let mut pos = vec![0_usize;(n+1) as usize];
-    
-    for (i, v) in arr.iter().enumerate(){
-        pos[*v as usize] = i;
-    }
-    let mut ans:i64 = 1;
-    for i in 2..=n as usize{
-        if pos[i] < pos[i-1]  {
-            ans+=1;
+    let mut ans:i64 = i64::MIN;
+    let mut sum:i64 = 0;
+    for i in arr{
+        sum += i as i64;
+        ans = ans.max(sum);
+        if sum < 0 {
+            sum = 0;
         }
     }
-    for _ in 0..m{
-        let (mut from,mut to) = read_int_pair(reader);
-        from-=1;
-        to-=1;
-        let from_elem = arr[from as usize];
-        let to_elem = arr[to as usize];
-        // swap in arr
-        // swap in pos aswell
-        arr[from as usize] = to_elem;
-        arr[to as usize] = from_elem;
-        let mut orig_round = true;
-        pos[from_elem as usize] = to as usize;
-        pos[to_elem as usize] = from as usize;
-        println!("{ans}");
-    }
-    
+    println!("{ans}");
 }
     
 

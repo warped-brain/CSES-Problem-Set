@@ -91,36 +91,21 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
 
 
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let  (n, m) = read_int_pair(reader);
+    let n = read_int(reader);
     let mut arr = read_int_list(reader);
-    // arr.sort();
-    let mut pos = vec![0_usize;(n+1) as usize];
-    
-    for (i, v) in arr.iter().enumerate(){
-        pos[*v as usize] = i;
+    arr.sort();
+    let mut median_index = (None, None);
+    if arr.len() & 1 == 1{
+        median_index.0 = Some(arr.len()/2);
+        median_index.1 = Some(arr.len()/2);
     }
-    let mut ans:i64 = 1;
-    for i in 2..=n as usize{
-        if pos[i] < pos[i-1]  {
-            ans+=1;
-        }
+    else{
+        median_index.0 = Some(arr.len()/2);
+        median_index.1 = Some((arr.len() - 1) / 2);
     }
-    for _ in 0..m{
-        let (mut from,mut to) = read_int_pair(reader);
-        from-=1;
-        to-=1;
-        let from_elem = arr[from as usize];
-        let to_elem = arr[to as usize];
-        // swap in arr
-        // swap in pos aswell
-        arr[from as usize] = to_elem;
-        arr[to as usize] = from_elem;
-        let mut orig_round = true;
-        pos[from_elem as usize] = to as usize;
-        pos[to_elem as usize] = from as usize;
-        println!("{ans}");
-    }
-    
+    let mut left_median: u64 = arr.iter().map(|x| i32::abs(x - arr[median_index.0.unwrap()]) as u64).sum();
+    let mut right_median: u64 = arr.iter().map(|x| i32::abs(x - arr[median_index.1.unwrap()]) as u64).sum();
+    println!("{}", u64::min(left_median, right_median));
 }
     
 
