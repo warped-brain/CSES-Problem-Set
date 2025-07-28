@@ -89,20 +89,23 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-const MOD:u64 = 1e9 as u64 + 7;
+
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
     let  n = read_int(reader);
     let mut arr = read_int_list(reader);
-    let mut ans: u64 = 1;
     let mut map = HashMap::new();
-    for i in arr{
-        map.entry(i).and_modify(|c| *c+=1).or_insert(1);
+    let mut ans= 0;
+    let mut left: usize = 0;
+    for right in 0..n as usize{
+        map.entry(arr[right]).and_modify(|c| *c += 1).or_insert(1);
+        while left < right && map.get(&arr[right]).unwrap_or(&0) > &1 {
+            map.entry(arr[left]).and_modify(|c| *c -= 1);
+            left += 1;
+        }
+        ans += right - left + 1;
     }
-    for v in map.values(){
-        ans = ans * (v+1);
-        ans  = ans % MOD;
-    }
-    println!("{}", ans - 1);
+    
+    println!("{}", ans);
 }
     
 

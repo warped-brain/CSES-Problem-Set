@@ -4,7 +4,7 @@ use std::fmt::write;
 use std::io::{self, BufRead, BufReader, StdinLock, BufWriter, StdoutLock}; // Import necessary modules
 use std::io::Write;
 use std::num::NonZeroU64;
-use std::ops::{Bound, Range, RangeBounds, RangeFull, RangeInclusive, RangeToInclusive};
+use std::ops::Bound;
 fn read_int(reader: &mut BufReader<StdinLock<'static>>) -> i32 {
     let mut line = String::new();
     reader.read_line(&mut line)
@@ -89,20 +89,25 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-const MOD:u64 = 1e9 as u64 + 7;
+
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
     let  n = read_int(reader);
     let mut arr = read_int_list(reader);
-    let mut ans: u64 = 1;
+    // arr.sort();
+    // let mut left = 0;
+    let mut right:usize = 0;
     let mut map = HashMap::new();
-    for i in arr{
-        map.entry(i).and_modify(|c| *c+=1).or_insert(1);
+    let mut ans = 1;
+    for mut left in 0..n as usize{
+        while right < n as usize && map.get(&arr[right]).or(Some(&0)).unwrap() < &1{
+            map.entry(&arr[right]).and_modify(|count| *count  = *count+1).or_insert(1);
+            right += 1;
+        }
+        map.entry(&arr[left]).and_modify(|count| *count  = *count-1);
+        
+        ans = ans.max(right - left);
     }
-    for v in map.values(){
-        ans = ans * (v+1);
-        ans  = ans % MOD;
-    }
-    println!("{}", ans - 1);
+    println!("{ans}");
 }
     
 

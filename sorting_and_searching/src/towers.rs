@@ -4,7 +4,7 @@ use std::fmt::write;
 use std::io::{self, BufRead, BufReader, StdinLock, BufWriter, StdoutLock}; // Import necessary modules
 use std::io::Write;
 use std::num::NonZeroU64;
-use std::ops::{Bound, Range, RangeBounds, RangeFull, RangeInclusive, RangeToInclusive};
+use std::ops::Bound;
 fn read_int(reader: &mut BufReader<StdinLock<'static>>) -> i32 {
     let mut line = String::new();
     reader.read_line(&mut line)
@@ -89,20 +89,26 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-const MOD:u64 = 1e9 as u64 + 7;
+
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
     let  n = read_int(reader);
     let mut arr = read_int_list(reader);
-    let mut ans: u64 = 1;
-    let mut map = HashMap::new();
-    for i in arr{
-        map.entry(i).and_modify(|c| *c+=1).or_insert(1);
+    let mut ans = 1;
+    // println!("{:?}", towers);
+    let mut towers:BTreeMap<i32, i32> = BTreeMap::new();
+    for i in 0..n as usize {
+        if let Some((&key, &count)) = towers.range(arr[i] + 1 ..).next() {
+            if count == 1 {
+                towers.remove(&key);
+            } else {
+                towers.entry(key).and_modify(|c| *c -= 1);
+            }
+        }
+        towers.entry(arr[i]).and_modify(|c| *c+=1).or_insert(1);
+        
     }
-    for v in map.values(){
-        ans = ans * (v+1);
-        ans  = ans % MOD;
-    }
-    println!("{}", ans - 1);
+    let ans:i32 = towers.values().sum();
+    println!("{ans}");
 }
     
 
