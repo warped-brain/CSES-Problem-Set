@@ -1,10 +1,11 @@
 use std::cmp::{max, min};
-use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::fmt::write;
+use std::fs::read;
 use std::io::{self, BufRead, BufReader, StdinLock, BufWriter, StdoutLock}; // Import necessary modules
 use std::io::Write;
 use std::num::NonZeroU64;
-use std::ops::{Bound, Range, RangeBounds, RangeFull, RangeInclusive, RangeToInclusive};
+use std::ops::Bound;
 fn read_int(reader: &mut BufReader<StdinLock<'static>>) -> i32 {
     let mut line = String::new();
     reader.read_line(&mut line)
@@ -89,21 +90,31 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-const MOD:u64 = 1e9 as u64 + 7;
-fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let  n = read_int(reader);
-    let mut arr = read_int_list(reader);
-    let mut ans: u64 = 1;
-    let mut map = HashMap::new();
-    for i in arr{
-        map.entry(i).and_modify(|c| *c+=1).or_insert(1);
+fn rec(n: i32, k: i32) -> i32{
+    if n == 1 {
+        return 1;
     }
-    for v in map.values(){
-        ans = ans * (v+1);
-        ans  = ans % MOD;
-    }
-    println!("{}", ans - 1);
+    let person_removed = (rec(n-1, k) + k -1) % n + 1;
+    println!("pk: {}", person_removed);
+    return person_removed;
 }
+
+fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
+    let (n, k) = read_int_pair(reader);
+
+    let mut set: BTreeSet<i32> = (1..=n).collect();
+
+    let mut curr_index = 0;
+
+    while !set.is_empty() {
+        let len = set.len();
+        curr_index = (curr_index + k) % len as i32;
+        let value = *set.iter().nth(curr_index as usize).unwrap();
+        print!("{} ", &value);
+        set.remove(&value);
+    }
+    
+    }
     
 
 // [   |    ]

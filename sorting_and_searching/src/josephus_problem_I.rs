@@ -1,16 +1,15 @@
 use std::cmp::{max, min};
-use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::fmt::write;
-use std::fs::read;
 use std::io::{self, BufRead, BufReader, StdinLock, BufWriter, StdoutLock}; // Import necessary modules
 use std::io::Write;
 use std::num::NonZeroU64;
-use std::ops::Bound;
+use std::ops::{Bound, Range, RangeBounds, RangeFull, RangeInclusive, RangeToInclusive};
 fn read_int(reader: &mut BufReader<StdinLock<'static>>) -> i32 {
     let mut line = String::new();
     reader.read_line(&mut line)
     .expect("Failed to read N");
-
+ 
     let n: i32 = line.trim().parse().unwrap();
     n
 }
@@ -59,18 +58,18 @@ fn read_int_list(reader: &mut BufReader<StdinLock<'static>>) -> Vec<i32>{
     reader.read_line(&mut line).unwrap();
     let list = line.split_ascii_whitespace().map(|x| x.parse().unwrap()).collect();
     list
-
+ 
 }
-
+ 
 fn read_uint64_list(reader: &mut BufReader<StdinLock<'static>>) -> Vec<u64>{
     
     let mut line = String::new();   
     reader.read_line(&mut line).unwrap();
     let list = line.split_ascii_whitespace().map(|x| x.parse().unwrap()).collect();
     list
-
+ 
 }
-
+ 
 fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     let mut left:i32 = 0;
     let mut right:i32 = list.len() as i32 - 1;
@@ -89,68 +88,26 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     // println!("ans {}", ans);
     ans as usize
 }
-
-
+ 
+const MOD:u64 = 1e9 as u64 + 7;
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let (n, m) = read_int_pair(reader);
-    let mut arr = read_int_list(reader);
-    let mut mp = vec![0; (n+2) as usize];
-    for (ind, i) in arr.iter().enumerate(){
-        mp[*i as usize] = ind;
+    let  n = read_int(reader);
+    let mut st  = BTreeSet::new();
+    for i in 1..=n{
+        st.insert(i);
     }
-    let mut ans = 1;
-    for i in 2..=n as usize{
-        if mp[i] < mp[i-1]{
-            ans += 1;
-        }
-    }
-    for i in 0..m{
-        let (from, to) = read_int_pair(reader);
-        // check if replacing the from and to values maintain the increasing order
-        let from_val = arr[from as usize - 1];
-        let to_val = arr[to as usize - 1];
-
-
-        let from_val_ind = mp[from_val as usize];
-        let to_val_ind = mp[to_val as usize];
-
-
-        // println!("{:?}", &mp);
-        // before swaps
-
-        let mut affected = HashSet::new();
-        for &v in &[from_val, to_val] {
-            for &u in &[v - 1, v, v + 1] {
-                if u >= 1 && u <= n {
-                    affected.insert(u);
-                }
+    let mut print  = false;
+    while !st.is_empty(){
+        for i in st.clone().iter(){
+            if print {
+                print!("{i} ");
+                st.remove(i);}
+                print  = !print;
             }
-        }
-
-        // Remove breaks before swap
-        for &v in &affected {
-            if v > 1 && mp[v as usize] < mp[v as usize - 1] {
-                ans -= 1;
-            }
-        }
-
-        // Perform the swap
-        arr[from as usize - 1] = to_val;
-        arr[to as usize - 1] = from_val;
-        mp[from_val as usize] = to_val_ind;
-        mp[to_val as usize] = from_val_ind;
-
-        // Add breaks after swap
-        for &v in &affected {
-            if v > 1 && mp[v as usize] < mp[v as usize - 1] {
-                ans += 1;
-            }
-        }
-        println!("{ans}");
     }
 }
     
-
+ 
 // [   |    ]
 // cS >= mid
 fn main() {
@@ -165,4 +122,4 @@ fn main() {
         // };
     // }
     
-}   
+}
