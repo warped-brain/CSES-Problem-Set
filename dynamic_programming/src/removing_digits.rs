@@ -92,48 +92,34 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-fn rec(max_amt: i32, prices: &mut Vec<i32>, books: &mut Vec<i32>, i : usize, dp : &mut Vec<Vec<i32>>) -> i32{
-    if i == books.len(){
-        return 0;
+fn rec(num: i32, dp: &mut Vec<i32>) -> i32{
+    if num < 10 {
+        return 1;
     }
-    if dp[max_amt as usize][i as usize] != -1{
-        return dp[max_amt as usize][i as usize]
+    if dp[num as usize] != -1 {
+        return dp[num as usize];
     }
-    // pick;
-    let mut pick = -1;
-    if max_amt >= prices[i]{
-        pick = books[i] + rec(max_amt - prices[i], prices, books, i +1, dp)
+    let mut ans = i32::MAX;
+    // try to extract the digit and subtract
+    let mut temp = num;
+    while temp > 0 {
+        let digit = temp % 10;
+        temp = temp/10;
+        if digit > 0{
+            ans = ans.min(rec(num - digit, dp) + 1);
+        }
     }
-    let not_pick = rec(max_amt, prices, books,  i+1, dp);
-    dp[max_amt as usize][i as usize] = max(pick, not_pick);
-    return max(pick, not_pick);
-    
+    dp[num as usize] = ans;
+    return ans;
 }
 
 const MOD:i64 = 1e9 as i64 +7;
 
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let (n ,x) = read_int_pair(reader);
-    let mut prices = read_int_list(reader);
-    let mut books = read_int_list(reader);
-    let mut dp = vec![vec![0; x as usize + 1]; n as usize + 1];
-
-    for i in 1..=n as usize {
-        for w in 1..=x as usize {
-            let price = prices[i-1] as usize;
-            let pages = books[i-1];
-            
-            let dont_pick = dp[i-1][w];
-            
-            let mut pick = 0;
-            if w >= price {
-                pick = pages + dp[i-1][w - price];
-            }
-            
-            dp[i][w] = pick.max(dont_pick);
-        }
-    }
-    println!("{}", dp[n as usize][x as usize]);
+    let n = read_int(reader);
+    let mut dp = vec![-1; n as usize+1];
+    let ans = rec(n, &mut dp);
+    println!("{ans}");
 }
 
 

@@ -7,7 +7,7 @@ use std::io::{self, BufRead, BufReader, StdinLock, BufWriter, StdoutLock}; // Im
 use std::io::Write;
 use std::num::NonZeroU64;
 use std::ops::Bound;
-use std::{i32, u64, usize};
+use std::{u64, usize};
 fn read_int(reader: &mut BufReader<StdinLock<'static>>) -> i32 {
     let mut line = String::new();
     reader.read_line(&mut line)
@@ -92,48 +92,45 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-fn rec(max_amt: i32, prices: &mut Vec<i32>, books: &mut Vec<i32>, i : usize, dp : &mut Vec<Vec<i32>>) -> i32{
-    if i == books.len(){
-        return 0;
+fn rec(sum:i32, coins: &Vec<i32>, dp: &mut Vec<i64>) -> Option<u64>{
+    if sum == 0 {
+        return Some(0);
     }
-    if dp[max_amt as usize][i as usize] != -1{
-        return dp[max_amt as usize][i as usize]
+    if sum < 0 {
+        return None;
     }
-    // pick;
-    let mut pick = -1;
-    if max_amt >= prices[i]{
-        pick = books[i] + rec(max_amt - prices[i], prices, books, i +1, dp)
+    if dp[sum as usize] != -1 {
+        return Some(dp[sum as usize] as u64);
     }
-    let not_pick = rec(max_amt, prices, books,  i+1, dp);
-    dp[max_amt as usize][i as usize] = max(pick, not_pick);
-    return max(pick, not_pick);
-    
+    let mut ans = None;
+    for coin in coins.iter(){
+        if let Some(count) = rec(sum - *coin, coins, dp){
+            ans = Some(ans.unwrap_or(u64::MAX).min(count + 1));
+        }
+        
+    }
+    if let Some(val)= ans{
+        dp[sum as usize] = val as i64;
+    }
+    return ans;
 }
 
 const MOD:i64 = 1e9 as i64 +7;
 
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let (n ,x) = read_int_pair(reader);
-    let mut prices = read_int_list(reader);
-    let mut books = read_int_list(reader);
-    let mut dp = vec![vec![0; x as usize + 1]; n as usize + 1];
-
-    for i in 1..=n as usize {
-        for w in 1..=x as usize {
-            let price = prices[i-1] as usize;
-            let pages = books[i-1];
-            
-            let dont_pick = dp[i-1][w];
-            
-            let mut pick = 0;
-            if w >= price {
-                pick = pages + dp[i-1][w - price];
+    let (n, sum) = read_int_pair(reader);
+    let mut coins = read_int_list(reader);
+    let mut dp = vec![0; sum as usize+1];
+    dp[0] = 1;
+    for c in coins.iter() {
+        for amt in 1..=sum{
+            if amt >= *c {
+                dp[amt as usize] = (dp[amt as usize] + dp[(amt - *c) as usize]) % MOD;
             }
-            
-            dp[i][w] = pick.max(dont_pick);
         }
+        // println!("{:?}", &dp);
     }
-    println!("{}", dp[n as usize][x as usize]);
+    println!("{:?}", dp.last().unwrap());
 }
 
 

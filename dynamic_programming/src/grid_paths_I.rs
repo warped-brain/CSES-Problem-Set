@@ -92,48 +92,53 @@ fn lower_bound(list: &Vec<i32>, elem: i32) -> usize{
     ans as usize
 }
 
-fn rec(max_amt: i32, prices: &mut Vec<i32>, books: &mut Vec<i32>, i : usize, dp : &mut Vec<Vec<i32>>) -> i32{
-    if i == books.len(){
-        return 0;
+fn rec(num: i32, dp: &mut Vec<i32>) -> i32{
+    if num < 10 {
+        return 1;
     }
-    if dp[max_amt as usize][i as usize] != -1{
-        return dp[max_amt as usize][i as usize]
+    if dp[num as usize] != -1 {
+        return dp[num as usize];
     }
-    // pick;
-    let mut pick = -1;
-    if max_amt >= prices[i]{
-        pick = books[i] + rec(max_amt - prices[i], prices, books, i +1, dp)
+    let mut ans = i32::MAX;
+    // try to extract the digit and subtract
+    let mut temp = num;
+    while temp > 0 {
+        let digit = temp % 10;
+        temp = temp/10;
+        if digit > 0{
+            ans = ans.min(rec(num - digit, dp) + 1);
+        }
     }
-    let not_pick = rec(max_amt, prices, books,  i+1, dp);
-    dp[max_amt as usize][i as usize] = max(pick, not_pick);
-    return max(pick, not_pick);
-    
+    dp[num as usize] = ans;
+    return ans;
 }
 
 const MOD:i64 = 1e9 as i64 +7;
 
 fn testcase(reader:&mut BufReader<StdinLock<'static>> , writer: &mut BufWriter<StdoutLock<'static>>) {
-    let (n ,x) = read_int_pair(reader);
-    let mut prices = read_int_list(reader);
-    let mut books = read_int_list(reader);
-    let mut dp = vec![vec![0; x as usize + 1]; n as usize + 1];
-
-    for i in 1..=n as usize {
-        for w in 1..=x as usize {
-            let price = prices[i-1] as usize;
-            let pages = books[i-1];
-            
-            let dont_pick = dp[i-1][w];
-            
-            let mut pick = 0;
-            if w >= price {
-                pick = pages + dp[i-1][w - price];
+    let n = read_int(reader) as usize;
+    let mut grid:Vec<Vec<char>> = Vec::new();
+    for i in 0..n as usize{
+        let s = read_string(reader).chars().collect();
+        grid.push(s);
+    }
+    let mut dp = vec![vec![0_i64;n as usize];n as usize];
+    if grid[0][0] != '*'{
+        dp[0][0] = 1;
+    }
+    
+    for i in 0..n {
+        for j in 0..n {
+            // move right
+            if j + 1 < n && grid[i][j+1]!= '*'{
+                dp[i][j+1] = (dp[i][j+1] + dp[i][j]) % MOD
             }
-            
-            dp[i][w] = pick.max(dont_pick);
+            if i + 1< n && grid[i+1][j]!= '*'{
+                dp[i+1][j] = (dp[i+1][j] + dp[i][j]) % MOD
+            }
         }
     }
-    println!("{}", dp[n as usize][x as usize]);
+    println!("{:?}", dp[n-1][n-1]);
 }
 
 
